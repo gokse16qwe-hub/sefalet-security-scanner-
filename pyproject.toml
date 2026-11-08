@@ -1,0 +1,52 @@
+# ---------------------------------------------------------------
+# pyproject.toml: Projenin "kimlik kartı".
+# Python'a projenin adını, sürümünü ve hangi kütüphanelere
+# ihtiyaç duyduğunu söyler. `pip install -e .` bu dosyayı okur.
+# ---------------------------------------------------------------
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sefalet-scanner"
+version = "0.1.0.dev0"
+description = "Web sitesi güvenlik yapılandırma analiz aracı"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }   # Ticari ürün: açık kaynak lisansı yok
+
+# Programın çalışması için gereken kütüphaneler
+dependencies = [
+    "pydantic>=2.5,<3",      # Veri modelleri ve JSON dönüşümü
+    "requests>=2.31,<3",     # HTTP istekleri (header analizi)
+    "dnspython>=2.4,<3",     # DNS sorguları
+    "cryptography>=42",      # Sertifika ayrıştırma
+    "reportlab>=4.0,<5",     # PDF üretimi
+    "typer>=0.12",           # Komut satırı arayüzü
+]
+
+[project.optional-dependencies]
+# Sadece geliştirme/test sırasında gereken kütüphaneler:
+# kurulum: pip install -e ".[dev]"
+dev = [
+    "pytest>=8",
+    "responses>=0.25",       # HTTP isteklerini taklit etmek (internete çıkmadan test)
+    "pypdf>=4",              # Üretilen PDF'in içeriğini testte okumak
+]
+
+[tool.setuptools.packages.find]
+include = ["sefalet*"]
+
+[tool.setuptools.package-data]
+# PDF için kullanılacak Türkçe destekli fontlar pakete dahil edilsin
+"sefalet.reporting" = ["fonts/*.ttf"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# "network" işaretli testler gerçek internete çıkar; varsayılan olarak atlanır.
+# Çalıştırmak için: pytest -m network
+markers = [
+    "network: gerçek ağ bağlantısı gerektiren entegrasyon testleri",
+]
+addopts = "-m 'not network'"

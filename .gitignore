@@ -1,0 +1,27 @@
+# Python ara dosyaları
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Sanal ortam (her geliştirici kendi makinesinde oluşturur)
+.venv/
+venv/
+
+# Test ve araç önbellekleri
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Üretilen raporlar müşteri verisi içerebilir: asla git'e eklenmez
+reports/*
+!reports/.gitkeep
+
+# Yerel doğrulama token'ları ve loglar
+.sefalet/
+*.log
+
+# Editör dosyaları
+.vscode/
+.idea/
