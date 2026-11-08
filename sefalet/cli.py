@@ -277,5 +277,11 @@ def gui(
         raise _fail(f"Panel başlatılamadı (port {port} kullanımda olabilir): {exc}", EXIT_INPUT) from None
 
 
+from sefalet.pentest.cli import app as pentest_cli
+
+app.add_typer(pentest_cli, name="pentest",
+              help="Yetkilendirilmiş sızma testi (ayrı modül).")
+
+
 if __name__ == "__main__":
     app()
