@@ -15,6 +15,7 @@ USER_AGENT = f"SefaletScanner/{__version__} (guvenlik yapilandirma analizi)"
 # Ağ işlemleri için zaman aşımları (saniye)
 HTTP_TIMEOUT = 10
 DNS_TIMEOUT = 5
+TLS_TIMEOUT = 10
 
 # Yerel veri klasörü: doğrulama token'ları burada saklanır
 DATA_DIR = Path.home() / ".sefalet"

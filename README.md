@@ -13,7 +13,7 @@ Saldırı, exploit, brute force veya parola denemesi **yapmaz**.
 | Hedef doğrulama ve SSRF koruması | ✅ |
 | Tarama izni doğrulama (DNS TXT / HTTP dosyası / beyan) | ✅ |
 | HTTP güvenlik başlıkları analizi | ✅ |
-| SSL/TLS sertifika kontrolü | ⏳ |
+| SSL/TLS sertifika kontrolü | ✅ |
 | DNS kayıt kontrolü (SPF, DMARC, CAA…) | ⏳ |
 | Sınırlı TCP port kontrolü (**varsayılan kapalı**) | ⏳ |
 | JSON çıktı | ⏳ |

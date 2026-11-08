@@ -23,6 +23,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 from enum import StrEnum
+from typing import Any
 
 from pydantic import AwareDatetime, BaseModel, Field, model_validator
 
@@ -207,6 +208,9 @@ class CheckResult(BaseModel):
     # Hata veya atlanma nedeni (kullanıcıya gösterilecek Türkçe mesaj)
     message: str | None = None
     duration_seconds: float = Field(default=0.0, ge=0)
+    # Bulgu olmayan ama raporda gösterilecek bilgiler (ör. sertifika sağlayıcısı,
+    # bitiş tarihi, TLS sürümü). Değerler JSON'a yazılabilir olmalı (metin, sayı, liste).
+    details: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def _message_required_when_not_completed(self) -> CheckResult:
