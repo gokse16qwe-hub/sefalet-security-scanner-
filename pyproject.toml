@@ -50,6 +50,7 @@ include = ["sefalet*"]
 # PDF için kullanılacak Türkçe destekli fontlar pakete dahil edilsin
 "sefalet.reporting" = ["fonts/*.ttf", "fonts/*.txt"]
 "sefalet.web" = ["static/*"]
+"sefalet.pentest" = ["data/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
