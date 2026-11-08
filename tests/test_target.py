@@ -248,3 +248,12 @@ def test_invalid_input_fails_before_dns():
     # Ayrıştırma hatası DNS'e hiç gitmeden yakalanmalı
     with pytest.raises(TargetError, match="şema"):
         resolve_target("ftp://ornek.com", resolver=failing_resolver)
+
+
+@pytest.mark.parametrize(
+    ("raw", "label"),
+    [("ornek.com", "ornek.com"), ("http://ornek.com", "ornek.com"), ("ornek.com:8443", "ornek.com:8443"),
+     ("şirket.com.tr", "şirket.com.tr"), ("https://[::1]:8443", "[::1]:8443")],
+)
+def test_label(raw, label):
+    assert parse_target(raw).label == label

@@ -25,6 +25,8 @@ dependencies = [
     "reportlab>=4.0,<5",     # PDF üretimi
     "typer>=0.12",           # Komut satırı arayüzü
     "rich>=13",              # Renkli terminal çıktısı ve tablolar
+    "fastapi>=0.110",        # Yerel web paneli (API)
+    "uvicorn>=0.29",         # Web panelini çalıştıran sunucu
 ]
 
 # Kurulumdan sonra terminalde "sefalet" komutu oluşur
@@ -38,6 +40,7 @@ dev = [
     "pytest>=8",
     "responses>=0.25",       # HTTP isteklerini taklit etmek (internete çıkmadan test)
     "pypdf>=4",              # Üretilen PDF'in içeriğini testte okumak
+    "httpx>=0.27",           # Web paneli API testleri (FastAPI TestClient)
 ]
 
 [tool.setuptools.packages.find]
@@ -46,6 +49,7 @@ include = ["sefalet*"]
 [tool.setuptools.package-data]
 # PDF için kullanılacak Türkçe destekli fontlar pakete dahil edilsin
 "sefalet.reporting" = ["fonts/*.ttf", "fonts/*.txt"]
+"sefalet.web" = ["static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

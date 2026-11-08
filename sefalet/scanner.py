@@ -66,7 +66,7 @@ def run_scan(
         ensure_allowed(authorization, active=True)
 
     scan = ScanResult(
-        target=target.display_name,
+        target=target.label,
         target_ips=list(target.ip_addresses),
         authorization=authorization,
     )

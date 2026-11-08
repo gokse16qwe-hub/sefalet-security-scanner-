@@ -81,6 +81,14 @@ class ParsedTarget:
             return self.hostname
 
     @property
+    def label(self) -> str:
+        """Raporlarda hedef adı: varsayılan dışı port varsa eklenir (ör. localhost:8443)."""
+        if self.port == DEFAULT_PORTS[self.scheme]:
+            return self.display_name
+        host = f"[{self.display_name}]" if ":" in self.display_name else self.display_name
+        return f"{host}:{self.port}"
+
+    @property
     def base_url(self) -> str:
         """Kontrollerde kullanılacak kök adres, ör. https://ornek.com/"""
         host = f"[{self.hostname}]" if ":" in self.hostname else self.hostname

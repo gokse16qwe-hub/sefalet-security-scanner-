@@ -252,5 +252,30 @@ def scan(
         console.print(f"[green]✓[/] Rapor: {escape(str(path))}")
 
 
+@app.command()
+def gui(
+    port: Annotated[int, typer.Option(help="Panelin çalışacağı port.")] = 8765,
+    no_browser: Annotated[bool, typer.Option("--no-browser", help="Tarayıcıyı otomatik açma.")] = False,
+) -> None:
+    """Neon temalı yerel web panelini başlat (yalnızca bu bilgisayardan erişilir)."""
+    import threading
+    import webbrowser
+
+    import uvicorn
+
+    from sefalet.web.app import create_app
+
+    url = f"http://127.0.0.1:{port}/"
+    console.print(f"[bold cyan]Sefalet Console[/] çalışıyor: [link={url}]{url}[/link]")
+    console.print("Kapatmak için Ctrl+C. Panel yalnızca bu bilgisayardan erişilebilir.")
+    if not no_browser:
+        threading.Timer(1.0, lambda: webbrowser.open(url)).start()
+    try:
+        # host=127.0.0.1: panel ağdaki diğer cihazlara AÇILMAZ
+        uvicorn.run(create_app(), host="127.0.0.1", port=port, log_level="warning")
+    except OSError as exc:
+        raise _fail(f"Panel başlatılamadı (port {port} kullanımda olabilir): {exc}", EXIT_INPUT) from None
+
+
 if __name__ == "__main__":
     app()

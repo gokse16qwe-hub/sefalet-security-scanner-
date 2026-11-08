@@ -56,6 +56,18 @@ sefalet scan ornek.com
 
 Raporlar `reports/` klasörüne yazılır (`-o klasör` ile değiştirilebilir).
 
+### Görsel panel (neon-koyu tema)
+
+```bash
+sefalet gui
+```
+
+Tarayıcıda `http://127.0.0.1:8765/` adresinde panel açılır: güvenlik puanı, bulgu dağılımı,
+modül durumu, tarama geçmişi, rapor ayrıntıları, PDF/JSON indirme ve doğrulama talimatları.
+Panel yalnızca bu bilgisayardan erişilebilir (127.0.0.1, Host kontrolü, oturum anahtarı).
+Tarama geçmişi `~/.sefalet/scans/` klasöründe saklanır. Port değiştirmek için `--port 9000`,
+tarayıcıyı otomatik açmamak için `--no-browser`.
+
 ### Diğer seçenekler
 
 | Komut | Açıklama |
@@ -123,7 +135,8 @@ TLS ve port için 127.0.0.1 üzerinde geçici sunucular kullanılır.
 
 ```
 sefalet/
-├── cli.py             # Komut satırı arayüzü
+├── cli.py             # Komut satırı arayüzü (scan, token, gui)
+├── web/               # Yerel web paneli: app.py (API), jobs.py, history.py, static/
 ├── scanner.py         # Kontrolleri çalıştıran yönetici
 ├── target.py          # Hedef ayrıştırma, SSRF koruması
 ├── authorization.py   # Tarama izni doğrulama
