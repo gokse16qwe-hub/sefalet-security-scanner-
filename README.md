@@ -11,7 +11,7 @@ Saldırı, exploit, brute force veya parola denemesi **yapmaz**.
 |---|---|
 | Veri modelleri (bulgu, risk seviyesi, güven düzeyi) | ✅ |
 | Hedef doğrulama ve SSRF koruması | ✅ |
-| Tarama izni doğrulama (DNS TXT / HTTP dosyası / beyan) | ⏳ |
+| Tarama izni doğrulama (DNS TXT / HTTP dosyası / beyan) | ✅ |
 | HTTP güvenlik başlıkları analizi | ⏳ |
 | SSL/TLS sertifika kontrolü | ⏳ |
 | DNS kayıt kontrolü (SPF, DMARC, CAA…) | ⏳ |
