@@ -14,7 +14,7 @@ Saldırı, exploit, brute force veya parola denemesi **yapmaz**.
 | Tarama izni doğrulama (DNS TXT / HTTP dosyası / beyan) | ✅ |
 | HTTP güvenlik başlıkları analizi | ✅ |
 | SSL/TLS sertifika kontrolü | ✅ |
-| DNS kayıt kontrolü (SPF, DMARC, CAA…) | ⏳ |
+| DNS kayıt kontrolü (SPF, DMARC, CAA…) | ✅ |
 | Sınırlı TCP port kontrolü (**varsayılan kapalı**) | ⏳ |
 | JSON çıktı | ⏳ |
 | Türkçe PDF rapor | ⏳ |
