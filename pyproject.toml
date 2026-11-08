@@ -24,7 +24,12 @@ dependencies = [
     "cryptography>=42",      # Sertifika ayrıştırma
     "reportlab>=4.0,<5",     # PDF üretimi
     "typer>=0.12",           # Komut satırı arayüzü
+    "rich>=13",              # Renkli terminal çıktısı ve tablolar
 ]
+
+# Kurulumdan sonra terminalde "sefalet" komutu oluşur
+[project.scripts]
+sefalet = "sefalet.cli:app"
 
 [project.optional-dependencies]
 # Sadece geliştirme/test sırasında gereken kütüphaneler:

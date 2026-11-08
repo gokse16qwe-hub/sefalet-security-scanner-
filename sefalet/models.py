@@ -254,6 +254,7 @@ class ScanResult(BaseModel):
     # Her taramaya benzersiz kimlik verilir (raporları takip etmek için)
     scan_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     target: str = Field(min_length=1)
+    target_ips: list[str] = Field(default_factory=list)  # Bağlantı kurulan IP adresleri
     started_at: AwareDatetime = Field(default_factory=_utc_now)
     finished_at: AwareDatetime | None = None
     authorization: AuthorizationInfo
