@@ -15,7 +15,7 @@ Saldırı, exploit, brute force veya parola denemesi **yapmaz**.
 | HTTP güvenlik başlıkları analizi | ✅ |
 | SSL/TLS sertifika kontrolü | ✅ |
 | DNS kayıt kontrolü (SPF, DMARC, CAA…) | ✅ |
-| Sınırlı TCP port kontrolü (**varsayılan kapalı**) | ⏳ |
+| Sınırlı TCP port kontrolü (**varsayılan kapalı**) | ✅ |
 | JSON çıktı | ⏳ |
 | Türkçe PDF rapor | ⏳ |
 
