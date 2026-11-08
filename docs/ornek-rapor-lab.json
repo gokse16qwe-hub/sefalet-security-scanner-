@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "scanner_version": "0.1.0.dev0",
+  "scan_id": "2ac6f69e-7f37-447f-925b-daead3e97c04",
+  "target": "localhost",
+  "target_ips": [
+    "127.0.0.1"
+  ],
+  "started_at": "2026-11-08T01:29:10.844926Z",
+  "finished_at": "2026-11-08T01:29:10.881115Z",
+  "authorization": {
+    "method": "lab",
+    "verified_at": "2026-11-08T01:29:10.838919Z",
+    "details": "Yerel lab hedefi: localhost (127.0.0.1)."
+  },
+  "checks": [
+    {
+      "check_name": "tls",
+      "status": "completed",
+      "findings": [
+        {
+          "id": "TLS-002",
+          "category": "SSL/TLS",
+          "title": "Sertifika 14 gün içinde sona eriyor",
+          "severity": "medium",
+          "confidence": "confirmed",
+          "evidence": "Bitiş tarihi: 2026-11-18 01:27 UTC (9 gün kaldı).",
+          "description": "Sertifika yenilenmezse site kısa süre içinde erişilemez hale gelecek.",
+          "recommendation": "Sertifikayı yenileyin ve otomatik yenilemenin çalıştığını doğrulayın.",
+          "references": [
+            "https://wiki.mozilla.org/Security/Server_Side_TLS"
+          ]
+        },
+        {
+          "id": "TLS-004",
+          "category": "SSL/TLS",
+          "title": "Sertifika kendinden imzalı (self-signed)",
+          "severity": "high",
+          "confidence": "confirmed",
+          "evidence": "OpenSSL doğrulama hatası 18: self-signed certificate.",
+          "description": "Sertifika güvenilir bir sertifika otoritesi tarafından imzalanmamış. Tarayıcılar uyarı gösterir ve bağlantı, araya giren bir saldırgana karşı korunmaz.",
+          "recommendation": "Güvenilir bir otoriteden sertifika alın ve sunucuya tam sertifika zincirini (fullchain) yükleyin.",
+          "references": [
+            "https://wiki.mozilla.org/Security/Server_Side_TLS"
+          ]
+        }
+      ],
+      "message": null,
+      "duration_seconds": 0.017320727999958763,
+      "details": {
+        "subject": "localhost",
+        "issuer": "localhost",
+        "issuer_organization": "",
+        "not_before": "2026-11-07T01:27:23+00:00",
+        "not_after": "2026-11-18T01:27:23+00:00",
+        "days_left": 9,
+        "san": [
+          "localhost"
+        ],
+        "serial": "1",
+        "key": "RSA 2048 bit",
+        "signature_algorithm": "sha256",
+        "protocol": "TLSv1.3",
+        "cipher": "TLS_AES_256_GCM_SHA384",
+        "legacy_protocols": {
+          "TLSv1": "desteklenmiyor",
+          "TLSv1.1": "desteklenmiyor"
+        }
+      }
+    },
+    {
+      "check_name": "headers",
+      "status": "completed",
+      "findings": [
+        {
+          "id": "HDR-008",
+          "category": "HTTP Güvenlik Başlıkları",
+          "title": "Referrer-Policy başlığı bulunamadı",
+          "severity": "info",
+          "confidence": "confirmed",
+          "evidence": "Yanıtta Referrer-Policy başlığı yok (https://localhost:18443/).",
+          "description": "Güncel tarayıcılar varsayılan olarak 'strict-origin-when-cross-origin' kullanır; yine de politikanın açıkça belirtilmesi eski tarayıcılarda adres bilgisinin (URL'deki parametreler dahil) başka sitelere sızmasını önler.",
+          "recommendation": "Referrer-Policy: strict-origin-when-cross-origin başlığını gönderin.",
+          "references": [
+            "https://owasp.org/www-project-secure-headers/"
+          ]
+        },
+        {
+          "id": "HDR-009",
+          "category": "HTTP Güvenlik Başlıkları",
+          "title": "Permissions-Policy başlığı bulunamadı",
+          "severity": "info",
+          "confidence": "confirmed",
+          "evidence": "Yanıtta Permissions-Policy başlığı yok (https://localhost:18443/).",
+          "description": "Bu başlık kamera, mikrofon, konum gibi tarayıcı özelliklerinin sayfada kullanımını kısıtlar. Kullanılmayan özelliklerin kapatılması önerilir.",
+          "recommendation": "Örnek: Permissions-Policy: camera=(), microphone=(), geolocation=()",
+          "references": [
+            "https://owasp.org/www-project-secure-headers/"
+          ]
+        },
+        {
+          "id": "HDR-011",
+          "category": "HTTP Güvenlik Başlıkları",
+          "title": "Sunucu yazılım sürümü açıkça gösteriliyor",
+          "severity": "low",
+          "confidence": "confirmed",
+          "evidence": "Server: BaseHTTP/0.6 Python/3.13.18 (https://localhost:18443/)",
+          "description": "Sürüm bilgisi, saldırganın bilinen açıkları hedeflemesini kolaylaştırır. Bu tarama, belirtilen sürümde gerçekten bir açık olup olmadığını doğrulamaz.",
+          "recommendation": "Sunucu yapılandırmasında sürüm bilgisini gizleyin (ör. nginx: server_tokens off; Apache: ServerTokens Prod).",
+          "references": [
+            "https://owasp.org/www-project-secure-headers/"
+          ]
+        }
+      ],
+      "message": "Lab modu: başlıklar okunurken sertifika doğrulaması atlandı.",
+      "duration_seconds": 0.01318537599991032,
+      "details": {}
+    },
+    {
+      "check_name": "dns",
+      "status": "skipped",
+      "findings": [],
+      "message": "Hedef yerel bir ad olduğu için internet DNS kontrolleri uygulanamaz.",
+      "duration_seconds": 3.19600030707079e-6,
+      "details": {}
+    },
+    {
+      "check_name": "ports",
+      "status": "completed",
+      "findings": [],
+      "message": null,
+      "duration_seconds": 0.005373993000375776,
+      "details": {
+        "ip": "127.0.0.1",
+        "ports": {
+          "21": "kapalı",
+          "22": "kapalı",
+          "23": "kapalı",
+          "25": "kapalı",
+          "53": "kapalı",
+          "80": "kapalı",
+          "110": "kapalı",
+          "143": "kapalı",
+          "443": "kapalı",
+          "445": "kapalı",
+          "1433": "kapalı",
+          "3306": "kapalı",
+          "3389": "kapalı",
+          "5432": "kapalı",
+          "5900": "kapalı",
+          "6379": "kapalı",
+          "8080": "kapalı",
+          "8443": "kapalı",
+          "9200": "kapalı",
+          "11211": "kapalı",
+          "27017": "kapalı"
+        },
+        "open": []
+      }
+    }
+  ],
+  "risk": {
+    "score": 69,
+    "grade": "C",
+    "counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 1,
+      "low": 1,
+      "info": 2
+    },
+    "probable_count": 0,
+    "complete": true,
+    "summary_tr": "Genel not C. Öncelikli ele alınması gereken 1 ciddi bulgu var."
+  }
+}
