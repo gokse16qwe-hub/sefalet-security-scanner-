@@ -13,6 +13,7 @@ import datetime as dt
 import socket
 import ssl
 import threading
+import warnings
 
 import pytest
 from cryptography import x509
@@ -248,7 +249,7 @@ def test_no_tls13_is_info():
 class LocalTLSServer:
     """127.0.0.1 üzerinde, verilen sertifikayla çalışan küçük TLS sunucusu."""
 
-    def __init__(self, cert, key, tmp_path):
+    def __init__(self, cert, key, tmp_path, legacy=False):
         cert_file = tmp_path / "cert.pem"
         key_file = tmp_path / "key.pem"
         cert_file.write_bytes(cert.public_bytes(serialization.Encoding.PEM))
@@ -257,6 +258,16 @@ class LocalTLSServer:
                                                serialization.NoEncryption()))
         self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         self.context.load_cert_chain(cert_file, key_file)
+        # Sunucunun hangi TLS sürümlerini kabul ettiğini açıkça belirliyoruz.
+        # Belirtmezsek davranış işletim sistemine göre değişir (Kali'deki Python
+        # 3.14 varsayılan olarak TLS 1.0'ı kabul ederken başka sistemler etmez).
+        if legacy:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                self.context.minimum_version = ssl.TLSVersion.TLSv1
+            self.context.set_ciphers("ALL:@SECLEVEL=0")
+        else:
+            self.context.minimum_version = ssl.TLSVersion.TLSv1_2
         self.sock = socket.create_server(("127.0.0.1", 0))
         self.port = self.sock.getsockname()[1]
         self._stop = False
@@ -333,7 +344,7 @@ def test_real_handshake_trusted_certificate(ca_signed_server):
     assert result.details["subject"] == "localhost"
     assert result.details["issuer"] == "Sefalet Test CA"
     assert result.details["protocol"].startswith("TLSv1.")
-    # Python'un sunucu bağlamı TLS 1.0/1.1 kabul etmez
+    # Test sunucusu yalnızca TLS 1.2+ kabul ediyor: eski sürümler "destekleniyor" çıkmamalı
     assert SUPPORTED not in result.details["legacy_protocols"].values()
 
 
@@ -384,3 +395,25 @@ def test_http_target_is_skipped():
     result = check_tls(target)
     assert result.status is CheckStatus.SKIPPED
     assert "https://" in result.message
+
+
+def test_real_handshake_detects_legacy_tls(tmp_path):
+    """TLS 1.0 kabul eden bir sunucuda TLS-009 bulgusu üretilmeli.
+
+    Bazı sistemlerin OpenSSL'i TLS 1.0 el sıkışmasını hiç yapamaz; o durumda
+    sonuç doğru şekilde "test edilemedi" olur ve bu test atlanır.
+    """
+    now = dt.datetime.now(dt.timezone.utc)
+    cert = make_cert(cn="localhost", san=("localhost",), not_before=now - dt.timedelta(days=1),
+                     not_after=now + dt.timedelta(days=90))
+    try:
+        server = LocalTLSServer(cert, _RSA_2048, tmp_path, legacy=True)
+    except (ValueError, ssl.SSLError):
+        pytest.skip("Bu sistemde TLS 1.0 sunucusu açılamıyor")
+    try:
+        result = check_tls(lab_target(server.port))
+    finally:
+        server.close()
+    if result.details["legacy_protocols"]["TLSv1"] != SUPPORTED:
+        pytest.skip("Bu sistemin OpenSSL'i TLS 1.0 el sıkışmasına izin vermiyor")
+    assert "TLS-009" in ids(result.findings)
