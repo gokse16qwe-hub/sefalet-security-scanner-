@@ -277,5 +277,93 @@ def gui(
         raise _fail(f"Panel başlatılamadı (port {port} kullanımda olabilir): {exc}", EXIT_INPUT) from None
 
 
+@app.command()
+def kontrol() -> None:
+    """Aracın düzgün kurulup kurulmadığını kontrol eder (sorun gidermenin ilk adımı).
+
+    Bir şey çalışmıyorsa önce bu komutu çalıştırın: Python sürümü, sanal ortam,
+    kütüphaneler, fontlar ve yazma izni tek tek kontrol edilir ve ne yapmanız
+    gerektiği yazılır.
+    """
+    import importlib
+    import sys
+
+    problems = 0
+
+    def ok(label: str) -> None:
+        console.print(f"  [green]✓[/] {label}")
+
+    def fail(label: str, fix: str) -> None:
+        nonlocal problems
+        problems += 1
+        console.print(f"  [bold red]✗[/] {label}")
+        console.print(f"     [yellow]Çözüm:[/] {escape(fix)}")
+
+    console.print("[bold]Sefalet Security Scanner — kurulum kontrolü[/]\n")
+
+    # 1) Python sürümü
+    v = sys.version_info
+    if v >= (3, 11):
+        ok(f"Python sürümü: {v.major}.{v.minor}.{v.micro}")
+    else:
+        fail(f"Python sürümü çok eski: {v.major}.{v.minor}",
+             "Python 3.11 veya üzeri gerekir. Kali'de: sudo apt install python3")
+
+    # 2) Sanal ortam
+    in_venv = sys.prefix != getattr(sys, "base_prefix", sys.prefix)
+    if in_venv:
+        ok("Sanal ortam etkin (.venv)")
+    else:
+        fail("Sanal ortam etkin değil",
+             "Şunu çalıştırın: source .venv/bin/activate  (yoksa önce: python3 -m venv .venv)")
+
+    # 3) Kütüphaneler
+    libs = {"requests": "requests", "dns": "dnspython", "cryptography": "cryptography",
+            "reportlab": "reportlab", "typer": "typer", "rich": "rich",
+            "fastapi": "fastapi", "uvicorn": "uvicorn"}
+    missing = []
+    for module, package in libs.items():
+        try:
+            importlib.import_module(module)
+        except ImportError:
+            missing.append(package)
+    if not missing:
+        ok(f"Gerekli kütüphaneler kurulu ({len(libs)} paket)")
+    else:
+        fail(f"Eksik kütüphaneler: {', '.join(missing)}",
+             'Şunu çalıştırın: pip install -e ".[dev]"')
+
+    # 4) PDF fontları
+    from sefalet.reporting.pdf_report import FONT_DIR
+
+    fonts = [FONT_DIR / "DejaVuSans.ttf", FONT_DIR / "DejaVuSans-Bold.ttf"]
+    if all(f.exists() for f in fonts):
+        ok("Türkçe PDF fontları mevcut")
+    else:
+        fail("PDF fontları eksik (Türkçe karakterler bozuk çıkar)",
+             "Depoyu eksiksiz indirdiğinizden emin olun; git clone'u tekrar deneyin.")
+
+    # 5) Rapor klasörüne yazma izni
+    try:
+        test_dir = Path("reports")
+        test_dir.mkdir(exist_ok=True)
+        probe = test_dir / ".sefalet_yazma_testi"
+        probe.write_text("x", encoding="utf-8")
+        probe.unlink()
+        ok("Rapor klasörüne yazılabiliyor")
+    except OSError as exc:
+        fail(f"Rapor klasörüne yazılamıyor: {exc}",
+             "Yazma izniniz olan bir klasörde çalıştırın veya -o ile başka klasör verin.")
+
+    console.print()
+    if problems == 0:
+        console.print("[bold green]Her şey yolunda.[/] Aracı kullanabilirsiniz:")
+        console.print("  sefalet token ornek.com   ·   sefalet scan ornek.com   ·   sefalet gui")
+    else:
+        console.print(f"[bold red]{problems} sorun bulundu.[/] Yukarıdaki çözümleri uygulayıp "
+                      "'sefalet kontrol' komutunu tekrar çalıştırın.")
+        raise typer.Exit(EXIT_INPUT)
+
+
 if __name__ == "__main__":
     app()

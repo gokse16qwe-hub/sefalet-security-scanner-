@@ -1,0 +1,36 @@
+SEFALET SECURITY SCANNER — KULLANIM LİSANSI
+
+Telif hakkı © Sefalet Software. Tüm hakları saklıdır.
+
+1. LİSANS
+Bu yazılımı satın alan kişiye, yazılımı kendi işlerinde kullanması için
+münhasır olmayan (başkalarıyla paylaşılabilen bir hakkın size özel olmadığı)
+bir kullanım lisansı verilir.
+
+2. İZİN VERİLENLER
+- Yazılımı kendi bilgisayarınızda kurup çalıştırabilirsiniz.
+- Sahibi olduğunuz veya tarama için açık yazılı izin aldığınız hedefleri
+  tarayabilirsiniz.
+- Ürettiğiniz raporları kendi müşterilerinize sunabilirsiniz.
+
+3. İZİN VERİLMEYENLER
+- Yazılımın kaynak kodunu bir ürün olarak yeniden satmak veya ücretsiz
+  dağıtmak (kendi hizmetinizde kullanmak serbesttir; kodu olduğu gibi
+  başkasına satmak değildir).
+- Yazılımı, sahibi olmadığınız ve izin almadığınız sistemlere karşı
+  kullanmak.
+
+4. SORUMLULUK
+Bu yazılım "olduğu gibi" sunulur; hiçbir açık veya örtülü garanti verilmez.
+Yazılımın kullanımından doğacak her türlü sonuçtan kullanıcı sorumludur.
+Satıcı, yazılımın kullanımından doğan doğrudan veya dolaylı hiçbir zarardan
+sorumlu tutulamaz.
+
+5. YASAL KULLANIM
+Bir bilişim sistemine izinsiz erişim ve tarama, Türk Ceza Kanunu'nun 243-245.
+maddeleri kapsamında suçtur. Kullanıcı, yazılımı YALNIZCA sahibi olduğu veya
+tarama için açık yazılı izin aldığı hedeflerde kullanmaktan tek başına
+sorumludur. Bu kurala uyulmamasından doğacak hiçbir hukuki ve cezai
+sorumluluk satıcıya ait değildir.
+
+Bu yazılımı satın alarak yukarıdaki koşulları kabul etmiş sayılırsınız.

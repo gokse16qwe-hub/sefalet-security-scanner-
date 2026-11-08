@@ -181,3 +181,35 @@ def test_report_write_failure(env, tmp_path):
     result = runner.invoke(cli.app, ["scan", "localhost", "--lab", "-o", str(blocker / "alt")])
     assert result.exit_code == cli.EXIT_OUTPUT
     assert "Rapor yazılamadı" in result.output
+
+
+def test_kontrol_passes_in_healthy_env():
+    result = runner.invoke(cli.app, ["kontrol"])
+    assert result.exit_code == 0
+    assert "Her şey yolunda" in result.output
+    assert "Python sürümü" in result.output
+
+
+def test_kontrol_reports_missing_library(monkeypatch):
+    import builtins
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "fastapi":
+            raise ImportError("yok")
+        return real_import(name, *args, **kwargs)
+
+    # importlib.import_module fastapi'yi bulamasın
+    import importlib
+    real_module = importlib.import_module
+
+    def fake_module(name, *a, **k):
+        if name == "fastapi":
+            raise ImportError("yok")
+        return real_module(name, *a, **k)
+
+    monkeypatch.setattr(importlib, "import_module", fake_module)
+    result = runner.invoke(cli.app, ["kontrol"])
+    assert result.exit_code == cli.EXIT_INPUT
+    assert "Eksik kütüphaneler" in result.output
+    assert "fastapi" in result.output

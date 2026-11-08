@@ -20,6 +20,18 @@ Saldırı, exploit, brute force veya parola denemesi **yapmaz**.
 | JSON çıktı | ✅ |
 | Türkçe PDF rapor | ✅ |
 
+## Ön koşullar
+
+Bu bir **komut satırı** aracıdır. Kullanmak için temel terminal bilgisi (komut
+yazma, `cd` ile klasör değiştirme, dosya düzenleme) ve Python 3.11+ gerekir.
+Ayrıntılı kurulum ve sorun giderme için: [`docs/KURULUM-ve-SSS.md`](docs/KURULUM-ve-SSS.md)
+
+Kurulumdan sonra her şeyin yolunda olduğunu doğrulamak için:
+
+```bash
+sefalet kontrol
+```
+
 ## Kurulum (Kali Linux)
 
 Kali, `pip` ile doğrudan sisteme paket kurulmasına izin vermez (PEP 668).
