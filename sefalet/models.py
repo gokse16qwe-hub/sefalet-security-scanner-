@@ -235,6 +235,17 @@ class AuthorizationInfo(BaseModel):
     details: str = Field(min_length=1)
 
 
+class RiskSummary(BaseModel):
+    """Taramanın genel risk özeti (risk.py hesaplar)."""
+
+    score: int = Field(ge=0, le=100)          # 100 = hiç sorun bulunamadı
+    grade: str = Field(pattern=r"^[A-F]$")   # A (en iyi) – F (en kötü)
+    counts: dict[Severity, int]
+    probable_count: int = Field(default=0, ge=0)  # Manuel doğrulama gereken bulgu sayısı
+    complete: bool = True                     # Tüm kontroller tamamlandı mı?
+    summary_tr: str = ""                      # Yönetici özeti için tek cümle
+
+
 class ScanResult(BaseModel):
     """Bir taramanın tüm sonucu. JSON ve PDF raporları bundan üretilir."""
 
@@ -247,6 +258,7 @@ class ScanResult(BaseModel):
     finished_at: AwareDatetime | None = None
     authorization: AuthorizationInfo
     checks: list[CheckResult] = Field(default_factory=list)
+    risk: RiskSummary | None = None
 
     def all_findings(self) -> list[Finding]:
         """Bütün kontrollerin bulgularını, en ciddiden en hafife sıralı döndürür."""
