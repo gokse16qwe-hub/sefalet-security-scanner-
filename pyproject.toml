@@ -45,7 +45,7 @@ include = ["sefalet*"]
 
 [tool.setuptools.package-data]
 # PDF için kullanılacak Türkçe destekli fontlar pakete dahil edilsin
-"sefalet.reporting" = ["fonts/*.ttf"]
+"sefalet.reporting" = ["fonts/*.ttf", "fonts/*.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
