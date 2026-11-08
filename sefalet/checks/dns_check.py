@@ -176,6 +176,16 @@ def analyze_dmarc(domain: str, dmarc_records: list[str]) -> list[Finding]:
 # ---------------------------------------------------------------------------
 
 
+# Yerel/özel kullanım için ayrılmış adlar: internet DNS'inde e-posta kayıtları olmaz
+_LOCAL_SUFFIXES = (".localhost", ".local", ".test", ".internal", ".lan", ".home.arpa",
+                   ".example", ".invalid")
+
+
+def is_local_name(hostname: str) -> bool:
+    """'localhost', 'sunucu' veya 'uygulama.test' gibi yerel adlar mı?"""
+    return "." not in hostname or hostname == "localhost" or hostname.endswith(_LOCAL_SUFFIXES)
+
+
 def _email_domain(hostname: str) -> str:
     return hostname[4:] if hostname.startswith("www.") else hostname
 
@@ -192,6 +202,9 @@ def check_dns(target: Target, *, resolve: Resolve = _default_resolve) -> CheckRe
     if target.is_ip:
         return result(CheckStatus.SKIPPED,
                       message="Hedef bir IP adresi olduğu için DNS kontrolleri uygulanamaz.")
+    if is_local_name(target.hostname):
+        return result(CheckStatus.SKIPPED,
+                      message="Hedef yerel bir ad olduğu için internet DNS kontrolleri uygulanamaz.")
 
     failed: list[str] = []
     attempted: list[str] = []

@@ -30,7 +30,8 @@ def full_scan(make_finding):
         check_name="tls", status=CheckStatus.COMPLETED,
         findings=[make_finding(id="TLS-001", title="Sertifikanın süresi dolmuş",
                                severity=Severity.HIGH, evidence="Bitiş: 2026-01-01")],
-        details={"issuer": "Örnek Güvenilir CA", "days_left": -3, "protocol": "TLSv1.3",
+        details={"issuer": "Örnek Güvenilir CA", "days_left": -3,
+                 "not_after": "2026-01-01T09:30:00+00:00", "protocol": "TLSv1.3",
                  "legacy_protocols": {"TLSv1": "test edilemedi"}},
     )
     headers = CheckResult(
@@ -58,7 +59,7 @@ def test_pdf_contains_all_sections_and_turkish_text(full_scan, tmp_path):
         "Güvenlik Yapılandırma Raporu", "şirket.com.tr", "Yönetici Özeti", "Kapsam ve Yöntem",
         "Bulgu Özeti", "Detaylı Bulgular", "Teknik Ayrıntılar", "Sınırlamalar ve Yasal Uyarı",
         "Şifreleme ğüşıöç İİ", "Ayşe Yılmaz", "Örnek Güvenilir CA",
-        "Kullanıcı izin beyanı", "Tamamlanamadı", "Atlandı",
+        "Kullanıcı izin beyanı", "Tamamlanamadı", "Atlandı", "01.01.2026 09:30 UTC",
     ]:
         assert expected in text, f"PDF'te '{expected}' bulunamadı"
 

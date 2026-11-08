@@ -17,8 +17,15 @@ def scan(lab_authorization):
 
 def test_default_filename_is_safe(scan):
     name = default_filename(scan, "json")
-    assert name == "sefalet__irket.com.tr_20261108-120005.json"
+    assert name == f"sefalet__irket.com.tr_20261108-120005_{scan.scan_id[:8]}.json"
     assert "/" not in default_filename(scan.model_copy(update={"target": "../../etc"}), "json")
+
+
+def test_same_second_scans_get_different_names(lab_authorization):
+    started = datetime(2026, 11, 8, 12, 0, 5, tzinfo=timezone.utc)
+    a = ScanResult(target="ornek.com", authorization=lab_authorization, started_at=started)
+    b = ScanResult(target="ornek.com", authorization=lab_authorization, started_at=started)
+    assert default_filename(a, "json") != default_filename(b, "json")
 
 
 def test_write_json_creates_dirs_and_valid_file(scan, tmp_path):

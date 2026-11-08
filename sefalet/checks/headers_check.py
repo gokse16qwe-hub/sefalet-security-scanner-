@@ -19,11 +19,13 @@ from __future__ import annotations
 
 import re
 import time
+import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
 from urllib.parse import urljoin, urlsplit
 
 import requests
+import urllib3
 
 from sefalet import config
 from sefalet.models import CheckResult, CheckStatus, Confidence, Finding, Severity
@@ -349,11 +351,15 @@ def _same_site(url: str, hostname: str) -> bool:
     return host in (hostname, f"www.{hostname}") or f"www.{host}" == hostname
 
 
-def _get(url: str) -> requests.Response:
-    """Yönlendirme takip etmeden GET isteği yapar; gövdeyi indirmez."""
+def _get(url: str, verify: bool = True) -> requests.Response:
+    """Yönlendirme takip etmeden GET isteği yapar; gövdeyi indirmez.
+
+    verify=False yalnızca lab modunda kullanılır (kendi test ortamındaki
+    kendinden imzalı sertifikalar için).
+    """
     response = requests.get(
         url, timeout=config.HTTP_TIMEOUT, allow_redirects=False, stream=True,
-        headers={"User-Agent": config.USER_AGENT},
+        headers={"User-Agent": config.USER_AGENT}, verify=verify,
     )
     response.close()  # Yalnızca başlıklar lazım; gövdeyi indirmiyoruz
     return response
@@ -374,7 +380,7 @@ def _set_cookie_list(response: requests.Response) -> list[str]:
     return [value] if value else []
 
 
-def _fetch_final(target: Target) -> tuple[requests.Response, str, list[Finding]]:
+def _fetch_final(target: Target, verify: bool = True) -> tuple[requests.Response, str, list[Finding]]:
     """Ana sayfayı alır; yalnızca aynı sitedeki yönlendirmeleri takip eder.
 
     Başka bir siteye yönlendirmeler takip edilmez: hem izin kapsamı dışıdır,
@@ -382,7 +388,7 @@ def _fetch_final(target: Target) -> tuple[requests.Response, str, list[Finding]]
     """
     url = target.base_url
     notes: list[Finding] = []
-    response = _get(url)
+    response = _get(url, verify)
     for _ in range(MAX_REDIRECTS):
         location = response.headers.get("Location")
         if not (response.is_redirect and location):
@@ -407,7 +413,7 @@ def _fetch_final(target: Target) -> tuple[requests.Response, str, list[Finding]]
                 "Tüm yönlendirmelerin HTTPS adreslerine yapıldığından emin olun.",
             ))
         url = next_url
-        response = _get(url)
+        response = _get(url, verify)
     return response, url, notes
 
 
@@ -438,13 +444,19 @@ def _check_http_to_https(target: Target) -> list[Finding]:
 def check_headers(target: Target) -> CheckResult:
     """HTTP güvenlik başlıkları kontrolünü çalıştırır. Hata fırlatmaz."""
     started = time.monotonic()
+    # Lab modunda (kullanıcının kendi yerel ortamı) kendinden imzalı sertifikalar
+    # yaygındır; başlıkları okuyabilmek için sertifika doğrulaması atlanır.
+    # Sertifika sorunu TLS kontrolünde ayrıca raporlanır.
+    verify = not target.lab_mode
 
     def result(status: CheckStatus, findings: list[Finding], message: str | None = None):
         return CheckResult(check_name=CHECK_NAME, status=status, findings=findings,
                            message=message, duration_seconds=time.monotonic() - started)
 
     try:
-        response, final_url, findings = _fetch_final(target)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", urllib3.exceptions.InsecureRequestWarning)
+            response, final_url, findings = _fetch_final(target, verify)
     except requests.exceptions.SSLError:
         return result(CheckStatus.ERROR, [],
                       "HTTPS sertifikası doğrulanamadığı için başlıklar okunamadı. "
@@ -464,8 +476,11 @@ def check_headers(target: Target) -> CheckResult:
     )
     findings += _check_http_to_https(target)
 
-    message = None
+    notes = []
+    if not verify:
+        notes.append("Lab modu: başlıklar okunurken sertifika doğrulaması atlandı.")
     if response.status_code >= 400:
-        message = (f"Sunucu HTTP {response.status_code} döndürdü; başlıklar bu yanıta göre "
-                   "değerlendirildi. Uygulama sayfalarında başlıklar farklı olabilir.")
+        notes.append(f"Sunucu HTTP {response.status_code} döndürdü; başlıklar bu yanıta göre "
+                     "değerlendirildi. Uygulama sayfalarında başlıklar farklı olabilir.")
+    message = " ".join(notes) or None
     return result(CheckStatus.COMPLETED, findings, message)

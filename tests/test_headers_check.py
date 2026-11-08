@@ -299,3 +299,23 @@ def test_check_network_errors_become_error_result(exc, message_part):
     assert result.status is CheckStatus.ERROR
     assert message_part in result.message
     assert result.findings == []
+
+
+@responses.activate
+def test_public_target_verifies_certificates():
+    responses.get(BASE, headers=GOOD_HEADERS)
+    https_redirect()
+    check_headers(make_target())
+    # requests, ortamda REQUESTS_CA_BUNDLE varsa True yerine CA dosya yolunu koyar
+    assert responses.calls[0].request.req_kwargs["verify"] not in (False, None)
+
+
+@responses.activate
+def test_lab_mode_skips_certificate_verification_and_says_so():
+    url = "https://localhost:18443/"
+    responses.get(url, headers=GOOD_HEADERS)
+    target = make_target(hostname="localhost", port=18443, ip_addresses=("127.0.0.1",), lab_mode=True)
+    result = check_headers(target)
+    assert result.status is CheckStatus.COMPLETED
+    assert responses.calls[0].request.req_kwargs["verify"] is False
+    assert "Lab modu" in result.message

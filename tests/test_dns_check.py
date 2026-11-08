@@ -195,3 +195,18 @@ def test_details_are_json_serializable():
 
     result = check_dns(make_target(), resolve=fake_resolve(GOOD_ZONE))
     json.loads(result.model_dump_json())
+
+
+@pytest.mark.parametrize("host", ["localhost", "sunucu", "uygulama.test", "nas.local", "x.home.arpa"])
+def test_local_names_skipped(host):
+    resolver = fake_resolve({})
+    result = check_dns(make_target(host), resolve=resolver)
+    assert result.status is CheckStatus.SKIPPED
+    assert resolver.calls == []
+
+
+def test_normal_domain_not_treated_as_local():
+    from sefalet.checks.dns_check import is_local_name
+
+    assert not is_local_name("ornek.com.tr")
+    assert not is_local_name("testornek.com")

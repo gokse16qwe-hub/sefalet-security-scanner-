@@ -15,10 +15,15 @@ from sefalet.models import ScanResult
 
 
 def default_filename(scan: ScanResult, extension: str) -> str:
-    """Ör. sefalet_ornek.com_20261108-120000.json"""
+    """Ör. sefalet_ornek.com_20261108-120000_1a2b3c4d.json
+
+    Sondaki 8 karakter tarama kimliğinden gelir; aynı saniyede yapılan iki
+    taramanın raporları birbirinin üzerine yazılmaz.
+    """
     safe_target = re.sub(r"[^A-Za-z0-9.-]", "_", scan.target)[:80]
     stamp = scan.started_at.strftime("%Y%m%d-%H%M%S")
-    return f"sefalet_{safe_target}_{stamp}.{extension}"
+    short_id = re.sub(r"[^A-Za-z0-9]", "", scan.scan_id)[:8]
+    return f"sefalet_{safe_target}_{stamp}_{short_id}.{extension}"
 
 
 def write_json(scan: ScanResult, path: Path) -> Path:

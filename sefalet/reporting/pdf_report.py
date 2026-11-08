@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import os
 import tempfile
+from datetime import datetime
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -316,6 +317,11 @@ def _technical_details(scan: ScanResult, s) -> list:
 
 
 def _detail_text(value) -> str:
+    if isinstance(value, str) and len(value) >= 19 and value[4] == "-" and value[10] == "T":
+        try:  # ISO tarih metni → "18.11.2026 01:27 UTC"
+            return _format_dt(datetime.fromisoformat(value))
+        except ValueError:
+            pass
     if value is None:
         return "sorgulanamadı"
     if isinstance(value, bool):
