@@ -95,3 +95,29 @@ def test_apply_risk_and_json_roundtrip(lab_authorization, make_finding):
     assert (scan.risk.score, scan.risk.grade) == (92, "A")
     restored = ScanResult.model_validate_json(scan.to_json())
     assert restored.risk == scan.risk
+
+
+@pytest.mark.parametrize("status", [CheckStatus.ERROR, CheckStatus.SKIPPED])
+def test_incomplete_check_caps_grade_at_b(status):
+    checks = [
+        CheckResult(check_name="headers", status=CheckStatus.COMPLETED),
+        CheckResult(check_name="tls", status=status, message="yapılamadı"),
+    ]
+    risk = calculate_risk([], checks)
+    assert risk.score == 100
+    assert risk.grade == "B"  # "kontrol edemedim" ile "sorun yok" aynı not olmamalı
+    assert risk.complete is False
+    assert "tls" in risk.summary_tr and "eksik" in risk.summary_tr
+
+
+def test_incomplete_does_not_improve_worse_grade(make_finding):
+    checks = [CheckResult(check_name="dns", status=CheckStatus.SKIPPED, message="IP hedef")]
+    findings = [make_finding(severity=Severity.MEDIUM)] * 5
+    assert calculate_risk(findings, checks).grade == "D"
+
+
+def test_optional_port_check_skipped_is_not_incomplete():
+    checks = ok_checks() + [CheckResult(check_name="ports", status=CheckStatus.SKIPPED,
+                                        message="varsayılan kapalı")]
+    risk = calculate_risk([], checks)
+    assert (risk.grade, risk.complete) == ("A", True)

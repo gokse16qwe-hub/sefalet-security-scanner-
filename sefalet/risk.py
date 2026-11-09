@@ -12,7 +12,10 @@ Yöntem (raporda da açıkça yazılır, çünkü ticari bir üründe puanlaman�
 5. Üst sınırlar: Doğrulanmış bir Kritik bulgu varsa not en fazla F,
    doğrulanmış bir Yüksek bulgu varsa en fazla C olabilir. Böylece çok
    sayıda küçük sorunu olmayan ama bir ciddi açığı olan site "A" alamaz.
-6. Bir kontrol hata nedeniyle tamamlanamadıysa özet "eksik" işaretlenir.
+6. Bir kontrol hata veya uygulanamama (ör. HTTP hedefte TLS, IP hedefte DNS)
+   nedeniyle tamamlanamadıysa özet "eksik" işaretlenir ve not en fazla B olur:
+   hiç bakılmayan alan "sorun yok" anlamına gelmez. Varsayılan kapalı olan
+   isteğe bağlı port kontrolünün atlanması bunun dışındadır.
 """
 
 from __future__ import annotations
@@ -41,6 +44,10 @@ CONFIDENCE_FACTOR = {
 }
 GRADE_THRESHOLDS = [(90, "A"), (80, "B"), (65, "C"), (50, "D"), (0, "F")]
 GRADE_ORDER = "ABCDEF"
+# Tamamlanamayan kontrol varsa notun çıkabileceği en iyi değer.
+INCOMPLETE_GRADE_CAP = "B"
+# Varsayılan kapalı, kullanıcının bilerek açtığı kontroller: atlanması eksiklik sayılmaz.
+OPTIONAL_CHECKS = frozenset({"ports"})
 
 METHODOLOGY_TR = (
     "Puanlama 100 üzerinden başlar. Her bulgu risk seviyesine göre puan düşürür "
@@ -48,6 +55,7 @@ METHODOLOGY_TR = (
     "'olası' bulgular yarım puan düşürür; bilgi amaçlı bulgular puanı etkilemez. "
     "Not aralıkları: A ≥ 90, B ≥ 80, C ≥ 65, D ≥ 50, F < 50. Doğrulanmış Kritik "
     "bulgu varsa not en fazla F, doğrulanmış Yüksek bulgu varsa en fazla C olur. "
+    "Bir kontrol tamamlanamadıysa sonuç eksik sayılır ve not en fazla B olur. "
     "Bu puan yalnızca taranan yapılandırma kontrollerini yansıtır; sitenin genel "
     "güvenlik düzeyi hakkında kesin bir yargı değildir."
 )
@@ -74,24 +82,30 @@ def calculate_risk(findings: list[Finding], checks: list[CheckResult]) -> RiskSu
     elif Severity.HIGH in confirmed:
         grade = _cap(grade, "C")
 
+    incomplete = [
+        c.check_name for c in checks
+        if c.status is not CheckStatus.COMPLETED and c.check_name not in OPTIONAL_CHECKS
+    ]
+    if incomplete:
+        grade = _cap(grade, INCOMPLETE_GRADE_CAP)
+
     counts = {severity: 0 for severity in Severity}
     for f in findings:
         counts[f.severity] += 1
     probable = sum(1 for f in findings if f.confidence is Confidence.PROBABLE)
-    errored = [c.check_name for c in checks if c.status is CheckStatus.ERROR]
 
     return RiskSummary(
         score=score,
         grade=grade,
         counts=counts,
         probable_count=probable,
-        complete=not errored,
-        summary_tr=_summary_text(grade, counts, probable, errored),
+        complete=not incomplete,
+        summary_tr=_summary_text(grade, counts, probable, incomplete),
     )
 
 
 def _summary_text(grade: str, counts: dict[Severity, int], probable: int,
-                  errored: list[str]) -> str:
+                  incomplete: list[str]) -> str:
     serious = counts[Severity.CRITICAL] + counts[Severity.HIGH]
     if serious:
         text = f"Genel not {grade}. Öncelikli ele alınması gereken {serious} ciddi bulgu var."
@@ -104,9 +118,9 @@ def _summary_text(grade: str, counts: dict[Severity, int], probable: int,
         text = f"Genel not {grade}. Taranan kontrollerde önemli bir bulguya rastlanmadı."
     if probable:
         text += f" {probable} bulgu manuel doğrulama gerektiriyor."
-    if errored:
-        text += (f" Bazı kontroller tamamlanamadı ({', '.join(errored)}); sonuçlar eksik "
-                 "olabilir.")
+    if incomplete:
+        text += (f" Bazı kontroller tamamlanamadı ({', '.join(incomplete)}); sonuçlar eksik "
+                 f"olabilir, bu nedenle not en fazla {INCOMPLETE_GRADE_CAP} olabilir.")
     return text
 
 
